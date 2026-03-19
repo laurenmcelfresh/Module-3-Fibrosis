@@ -1,11 +1,14 @@
 '''Module 3: count black and white pixels and compute the percentage of white pixels in a .jpg image and extrapolate points'''
 
 from termcolor import colored
+from colorama import init
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 import pandas as pd
+
+init()
 
 # Load the images you want to analyze
 
@@ -21,12 +24,12 @@ filenames = [
 # Enter the depth of each image (in the same order that the images are listed above; you can find these in the .csv file provided to you which is tilted: "Filenames and Depths for Students")
 
 depths = [
-    15,
-    1000,
-    3000,
-    5300,
-    7000,
-    9900
+    955,
+    500,
+    2950,
+    4500,
+    780,
+    55
 ]
 
 # Make the lists that will be used
