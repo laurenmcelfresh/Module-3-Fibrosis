@@ -1,32 +1,35 @@
 '''Module 3: count black and white pixels and compute the percentage of white pixels in a .jpg image and extrapolate points'''
 
 from termcolor import colored
+from colorama import init
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 import pandas as pd
 
+init()
+
 # Load the images you want to analyze
 
 filenames = [
-    r"../images/MASK_SK658 Llobe ch010039.jpg",
-    r"../images/MASK_SK658 Slobe ch010066.jpg",
-    r"../images/MASK_SK658 Slobe ch010147.jpg",
-    r"../images/MASK_SK658 Slobe ch010110.jpg",
-    r"../images/MASK_SK658 Slobe ch010130.jpg",
-    r"../images/MASK_SK658 Slobe ch010114.jpg",
+    r"C:\Users\student\Documents\GitHub\Module-3-Fibrosis\images\MASK_Sk658 Llobe ch010031.jpg",
+    r"C:\Users\student\Documents\GitHub\Module-3-Fibrosis\images\MASK_Sk658 Llobe ch010032.jpg",
+    r"C:\Users\student\Documents\GitHub\Module-3-Fibrosis\images\MASK_Sk658 Llobe ch010033.jpg",
+    r"C:\Users\student\Documents\GitHub\Module-3-Fibrosis\images\MASK_Sk658 Llobe ch010034.jpg",
+    r"C:\Users\student\Documents\GitHub\Module-3-Fibrosis\images\MASK_Sk658 Llobe ch010035.jpg",
+    r"C:\Users\student\Documents\GitHub\Module-3-Fibrosis\images\MASK_Sk658 Llobe ch010036.jpg",
 ]
 
 # Enter the depth of each image (in the same order that the images are listed above; you can find these in the .csv file provided to you which is tilted: "Filenames and Depths for Students")
 
 depths = [
-    15,
-    1000,
-    3000,
-    5300,
-    7000,
-    9900
+    955,
+    500,
+    2950,
+    4500,
+    780,
+    55
 ]
 
 # Make the lists that will be used
