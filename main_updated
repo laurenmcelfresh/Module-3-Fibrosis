@@ -1,0 +1,135 @@
+# Claude was prompted to improve and change the code so that the white pixels
+# from blood vessels were not counted, only fibrosis in the lung.
+
+
+
+'''Module 3: count fibrosis white pixels (excluding blood vessels) and compute percentages'''
+
+from termcolor import colored
+from colorama import init
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+
+init()
+
+# ─── Configuration ────────────────────────────────────────────────────────────
+# Blood vessels appear as compact, roughly circular/oval blobs.
+# Tune these two parameters based on your imaging resolution.
+# MIN_VESSEL_AREA: minimum pixel area to consider a connected region a vessel.
+# MAX_VESSEL_AREA: maximum pixel area — very large blobs are fibrosis patches, not vessels.
+# CIRCULARITY_THRESHOLD: 4π·area/perimeter². Perfect circle = 1.0; irregular = closer to 0.
+#   Vessels score ~0.6–1.0; fibrosis typically scores below 0.5.
+MIN_VESSEL_AREA = 50
+MAX_VESSEL_AREA = 2000
+CIRCULARITY_THRESHOLD = 0.55
+
+filenames = [
+    r"C:\Users\student\Documents\GitHub\Module-3-Fibrosis\images\MASK_Sk658 Llobe ch010031.jpg",
+    r"C:\Users\student\Documents\GitHub\Module-3-Fibrosis\images\MASK_Sk658 Llobe ch010032.jpg",
+    r"C:\Users\student\Documents\GitHub\Module-3-Fibrosis\images\MASK_Sk658 Llobe ch010033.jpg",
+    r"C:\Users\student\Documents\GitHub\Module-3-Fibrosis\images\MASK_Sk658 Llobe ch010034.jpg",
+    r"C:\Users\student\Documents\GitHub\Module-3-Fibrosis\images\MASK_Sk658 Llobe ch010035.jpg",
+    r"C:\Users\student\Documents\GitHub\Module-3-Fibrosis\images\MASK_Sk658 Llobe ch010036.jpg",
+]
+
+depths = [955, 500, 2950, 4500, 780, 55]
+
+# ─── Helper: remove vessel-like blobs from a binary mask ──────────────────────
+def remove_vessels(binary_mask):
+    """
+    Returns a cleaned mask with circular/oval blobs (vessels) removed,
+    leaving only diffuse irregular regions (fibrosis).
+    Also returns a vessel-only mask for inspection.
+    """
+    # Find all connected white regions
+    num_labels, labels, stats, _ = cv2.connectedComponentsWithStats(
+        binary_mask, connectivity=8
+    )
+
+    fibrosis_mask = np.zeros_like(binary_mask)
+    vessel_mask   = np.zeros_like(binary_mask)
+
+    for label_id in range(1, num_labels):  # skip background (label 0)
+        area = stats[label_id, cv2.CC_STAT_AREA]
+        component = (labels == label_id).astype(np.uint8) * 255
+
+        # Compute circularity from the component's contour
+        contours, _ = cv2.findContours(component, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        if not contours:
+            continue
+        perimeter = cv2.arcLength(contours[0], True)
+        circularity = (4 * np.pi * area / (perimeter ** 2)) if perimeter > 0 else 0
+
+        is_vessel = (
+            MIN_VESSEL_AREA <= area <= MAX_VESSEL_AREA
+            and circularity >= CIRCULARITY_THRESHOLD
+        )
+
+        if is_vessel:
+            vessel_mask = cv2.bitwise_or(vessel_mask, component)
+        else:
+            fibrosis_mask = cv2.bitwise_or(fibrosis_mask, component)
+
+    return fibrosis_mask, vessel_mask
+
+
+# ─── Main analysis loop ────────────────────────────────────────────────────────
+images          = []
+raw_white       = []
+fibrosis_white  = []
+vessel_white    = []
+white_percents  = []
+
+for filename in filenames:
+    img = cv2.imread(filename, 0)
+    images.append(img)
+
+for x, img in enumerate(images):
+    _, binary = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)
+
+    fibrosis_mask, vessel_mask = remove_vessels(binary)
+
+    total_px        = binary.size
+    raw_white_px    = int(np.sum(binary == 255))
+    fibrosis_px     = int(np.sum(fibrosis_mask == 255))
+    vessel_px       = int(np.sum(vessel_mask == 255))
+
+    raw_white.append(raw_white_px)
+    fibrosis_white.append(fibrosis_px)
+    vessel_white.append(vessel_px)
+    white_percents.append(100 * fibrosis_px / total_px)
+
+# ─── Print results ─────────────────────────────────────────────────────────────
+print(colored("Fibrosis pixel counts (vessels excluded)", "yellow"))
+for x in range(len(filenames)):
+    removed = raw_white[x] - fibrosis_white[x]
+    print(colored(f"Image {x}: {filenames[x]}", "red"))
+    print(f"  Raw white px : {raw_white[x]:>8,}")
+    print(f"  Vessel px    : {vessel_white[x]:>8,}  (removed)")
+    print(f"  Fibrosis px  : {fibrosis_white[x]:>8,}")
+    print(f"  Fibrosis %   : {white_percents[x]:.4f}%  |  Depth: {depths[x]} µm")
+    print()
+
+# ─── Optional: save side-by-side diagnostic images ────────────────────────────
+# Uncomment to write one PNG per image showing original | fibrosis | vessels
+
+for x, img in enumerate(images):
+     _, binary = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)
+     fibrosis_mask, vessel_mask = remove_vessels(binary)
+     comparison = np.hstack([binary, fibrosis_mask, vessel_mask])
+     cv2.imwrite(f"debug_image_{x}.png", comparison)
+     print(f"Saved debug_image_{x}.png  (original | fibrosis | vessels)")
+
+# ─── Write CSV ────────────────────────────────────────────────────────────────
+df = pd.DataFrame({
+    'Filenames'       : filenames,
+    'Depths'          : depths,
+    'Raw_white_px'    : raw_white,
+    'Vessel_px'       : vessel_white,
+    'Fibrosis_px'     : fibrosis_white,
+    'Fibrosis_percent': white_percents,
+})
+df.to_csv('Percent_Fibrosis_Pixels.csv', index=False)
+print("CSV saved: 'Percent_Fibrosis_Pixels.csv'")
