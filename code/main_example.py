@@ -6,6 +6,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 import pandas as pd
+import time
+
+start_time = time.perf_counter()
 
 # Load the images you want to analyze
 
@@ -86,6 +89,8 @@ print("The .csv file 'Percent_White_Pixels.csv' has been created.")
 
 '''the .csv writing subroutine ends here'''
 
+end_time = time.perf_counter()
+print(f"\nTotal runtime: {end_time - start_time:.6f} seconds")
 
 ##############
 # LECTURE 2: UNCOMMENT BELOW
