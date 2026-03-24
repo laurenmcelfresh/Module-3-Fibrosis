@@ -23,14 +23,7 @@ filenames = [
 
 # Enter the depth of each image (in the same order that the images are listed above; you can find these in the .csv file provided to you which is tilted: "Filenames and Depths for Students")
 
-depths = [
-    955,
-    500,
-    2950,
-    4500,
-    780,
-    55
-]
+depths = [955, 500, 2950, 4500, 780, 55] # removed line breaks for readability
 
 # Make the lists that will be used
 
@@ -50,8 +43,9 @@ for filename in filenames:
 for x in range(len(filenames)):
     _, binary = cv2.threshold(images[x], 127, 255, cv2.THRESH_BINARY)
 
-    white = np.sum(binary == 255)
-    black = np.sum(binary == 0)
+    white = np.count_nonzero(binary) # directly counts white pixels
+    total_pixels = binary.size
+    black = total_pixels - white # uses math instead of counting again
 
     white_counts.append(white)
     black_counts.append(black)
@@ -67,8 +61,7 @@ for x in range(len(filenames)):
 # Calculate the percentage of pixels in each image that are white and make a list that contains these percentages for each filename
 
 for x in range(len(filenames)):
-    white_percent = (
-        100 * (white_counts[x] / (black_counts[x] + white_counts[x])))
+    white_percent = white_percent = 100 * (white_counts[x] / (white_counts[x] + black_counts[x]))
     white_percents.append(white_percent)
 
 # Print the filename (on one line in red font), and below that line print the percent white pixels and depth into the lung where the image was obtained
