@@ -100,7 +100,46 @@ for x, img in enumerate(images):
     fibrosis_white.append(fibrosis_px)
     vessel_white.append(vessel_px)
     white_percents.append(100 * fibrosis_px / total_px)
+    
+def diagnose_blobs(images):
+    print("=== Blob Diagnostic ===\n")
+    for x, img in enumerate(images):
+        _, binary = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)
+        contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        
+        print(f"Image {x}: {len(contours)} total blobs")
+        
+        areas = []
+        circularities = []
+        
+        for contour in contours:
+            area = cv2.contourArea(contour)
+            if area < 10:
+                continue
+            perimeter = cv2.arcLength(contour, True)
+            circularity = (4 * np.pi * area / (perimeter ** 2)) if perimeter > 0 else 0
+            areas.append(area)
+            circularities.append(circularity)
+        
+        if areas:
+            print(f"  Area     — min: {min(areas):.0f}  max: {max(areas):.0f}  median: {np.median(areas):.0f}")
+            print(f"  Circular — min: {min(circularities):.3f}  max: {max(circularities):.3f}  median: {np.median(circularities):.3f}")
+            
+            # Show how many blobs fall into each bucket
+            small  = sum(1 for a in areas if a < MIN_VESSEL_AREA)
+            medium = sum(1 for a in areas if MIN_VESSEL_AREA <= a <= MAX_VESSEL_AREA)
+            large  = sum(1 for a in areas if a > MAX_VESSEL_AREA)
+            circ   = sum(1 for c in circularities if c >= CIRCULARITY_THRESHOLD)
+            
+            print(f"  Blobs below MIN_VESSEL_AREA ({MIN_VESSEL_AREA}):   {small}")
+            print(f"  Blobs in vessel area range:                {medium}")
+            print(f"  Blobs above MAX_VESSEL_AREA ({MAX_VESSEL_AREA}): {large}")
+            print(f"  Blobs above circularity threshold ({CIRCULARITY_THRESHOLD}): {circ}")
+        print()
 
+diagnose_blobs(images)
+
+'''
 # ─── Print results ─────────────────────────────────────────────────────────────
 print(colored("Fibrosis pixel counts (vessels excluded)", "yellow"))
 for x in range(len(filenames)):
@@ -111,17 +150,19 @@ for x in range(len(filenames)):
     print(f"  Fibrosis px  : {fibrosis_white[x]:>8,}")
     print(f"  Fibrosis %   : {white_percents[x]:.4f}%  |  Depth: {depths[x]} µm")
     print()
+    '''
 
 # ─── Optional: save side-by-side diagnostic images ────────────────────────────
 # Uncomment to write one PNG per image showing original | fibrosis | vessels
-
+'''
 for x, img in enumerate(images):
      _, binary = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)
      fibrosis_mask, vessel_mask = remove_vessels(binary)
      comparison = np.hstack([binary, fibrosis_mask, vessel_mask])
      cv2.imwrite(f"debug_image_{x}.png", comparison)
      print(f"Saved debug_image_{x}.png  (original | fibrosis | vessels)")
-
+     '''
+'''
 # ─── Write CSV ────────────────────────────────────────────────────────────────
 df = pd.DataFrame({
     'Filenames'       : filenames,
@@ -133,3 +174,7 @@ df = pd.DataFrame({
 })
 df.to_csv('Percent_Fibrosis_Pixels.csv', index=False)
 print("CSV saved: 'Percent_Fibrosis_Pixels.csv'")
+'''
+
+
+
