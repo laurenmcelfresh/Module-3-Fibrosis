@@ -13,12 +13,12 @@ start_time = time.perf_counter()
 # Load the images you want to analyze
 
 filenames = [
-    r"C:\Users\vkb5cq\Desktop\Spring 2026\BME 2315\Module-3-Fibrosis\images\MASK_Sk658 Llobe ch010031.jpg",
-    r"C:\Users\vkb5cq\Desktop\Spring 2026\BME 2315\Module-3-Fibrosis\images\MASK_Sk658 Llobe ch010032.jpg",
-    r"C:\Users\vkb5cq\Desktop\Spring 2026\BME 2315\Module-3-Fibrosis\images\MASK_Sk658 Llobe ch010033.jpg",
-    r"C:\Users\vkb5cq\Desktop\Spring 2026\BME 2315\Module-3-Fibrosis\images\MASK_Sk658 Llobe ch010034.jpg",
-    r"C:\Users\vkb5cq\Desktop\Spring 2026\BME 2315\Module-3-Fibrosis\images\MASK_Sk658 Llobe ch010035.jpg",
-    r"C:\Users\vkb5cq\Desktop\Spring 2026\BME 2315\Module-3-Fibrosis\images\MASK_Sk658 Llobe ch010036.jpg",
+    r"C:\Users\student\Documents\GitHub\Module-3-Fibrosis\images\MASK_Sk658 Llobe ch010031.jpg",
+    r"C:\Users\student\Documents\GitHub\Module-3-Fibrosis\images\MASK_Sk658 Llobe ch010032.jpg",
+    r"C:\Users\student\Documents\GitHub\Module-3-Fibrosis\images\MASK_Sk658 Llobe ch010033.jpg",
+    r"C:\Users\student\Documents\GitHub\Module-3-Fibrosis\images\MASK_Sk658 Llobe ch010034.jpg",
+    r"C:\Users\student\Documents\GitHub\Module-3-Fibrosis\images\MASK_Sk658 Llobe ch010035.jpg",
+    r"C:\Users\student\Documents\GitHub\Module-3-Fibrosis\images\MASK_Sk658 Llobe ch010036.jpg",
 ]
 
 # Enter the depth of each image (in the same order that the images are listed above; you can find these in the .csv file provided to you which is tilted: "Filenames and Depths for Students")
@@ -104,7 +104,7 @@ x = depths
 y = white_percents
 
 # You can also use 'quadratic', 'cubic', etc.
-i = interp1d(x, y, kind='quadratic')
+i = interp1d(x, y, kind='linear')
 interpolate_point = i(interpolate_depth)
 print(colored(
     f'The interpolated point is at the x-coordinate {interpolate_depth} and y-coordinate {interpolate_point}.', "green"))
