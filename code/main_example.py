@@ -18,7 +18,7 @@ filenames = [
     r"C:\Users\student\Documents\GitHub\Module-3-Fibrosis\images\MASK_Sk658 Llobe ch010033.jpg",
     r"C:\Users\student\Documents\GitHub\Module-3-Fibrosis\images\MASK_Sk658 Llobe ch010034.jpg",
     r"C:\Users\student\Documents\GitHub\Module-3-Fibrosis\images\MASK_Sk658 Llobe ch010035.jpg",
-    r"C:\Users\student\Documents\GitHub\Module-3-Fibrosis\images\MASK_Sk658 Llobe ch010036.jpg",
+    r"C:\Users\student\Documents\GitHub\Module-3-Fibrosis\images\MASK_SK658 Llobe ch010036.jpg",
 ]
 
 # Enter the depth of each image (in the same order that the images are listed above; you can find these in the .csv file provided to you which is tilted: "Filenames and Depths for Students")
